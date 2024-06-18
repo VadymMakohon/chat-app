@@ -9,7 +9,7 @@ import { Video } from 'expo-av';
 
 const Chat = ({ db, route, navigation, isConnected, storage }) => {
     const [messages, setMessages] = useState([]);
-    const { name, userID } = route.params;
+    const { name, userID, color } = route.params;
 
     let unsubMessages;
 
@@ -122,7 +122,7 @@ const Chat = ({ db, route, navigation, isConnected, storage }) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: color }]}>
             <GiftedChat
                 messages={messages}
                 renderBubble={renderBubble}
