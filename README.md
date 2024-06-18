@@ -27,6 +27,17 @@ This React Native 'Chat App' utilizes Google Firebase and Firestore to provide a
 7. Run `npx expo install`
 8. Run `npx expo start`
 
+## Packages to install: 
+* npm install --save @react-navigation/native @react-navigation/native-stack
+* expo install react-native-screens react-native-safe-area-context
+* npm install react-native-gifted-chat --save
+* npm install firebase@9.13.0 --save
+* expo install @react-native-async-storage/async-storage
+* expo install @react-native-community/netinfo
+* expo install expo-image-picker
+* expo install expo-location
+* expo install react-native-maps
+
 ## Technologies Used
 
 - React Native

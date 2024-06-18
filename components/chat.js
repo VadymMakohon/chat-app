@@ -5,6 +5,7 @@ import { collection, addDoc, onSnapshot, query, orderBy } from "firebase/firesto
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MapView from 'react-native-maps';
 import CustomActions from './CustomActions';
+import { Video } from 'expo-av';
 
 const Chat = ({ db, route, navigation, isConnected, storage }) => {
     const [messages, setMessages] = useState([]);
@@ -15,8 +16,7 @@ const Chat = ({ db, route, navigation, isConnected, storage }) => {
     useEffect(() => {
         navigation.setOptions({ title: name });
 
-        if (isConnected === true) {
-
+        if (isConnected) {
             if (unsubMessages) unsubMessages();
             unsubMessages = null;
 
@@ -25,14 +25,14 @@ const Chat = ({ db, route, navigation, isConnected, storage }) => {
                 let newMessages = [];
                 docs.forEach(doc => {
                     newMessages.push({
-                        id: doc.id,
+                        _id: doc.id,
                         ...doc.data(),
                         createdAt: new Date(doc.data().createdAt.toMillis())
-                    })
-                })
+                    });
+                });
                 cacheMessages(newMessages);
                 setMessages(newMessages);
-            })
+            });
         } else loadCachedMessages();
 
         return () => {
@@ -54,11 +54,11 @@ const Chat = ({ db, route, navigation, isConnected, storage }) => {
     }
 
     const onSend = (newMessages) => {
-        addDoc(collection(db, "messages"), newMessages[0])
+        addDoc(collection(db, "messages"), newMessages[0]);
     }
 
     const renderInputToolbar = (props) => {
-        if (isConnected === true) return <InputToolbar {...props} />;
+        if (isConnected) return <InputToolbar {...props} />;
         else return null;
     }
 
@@ -77,7 +77,7 @@ const Chat = ({ db, route, navigation, isConnected, storage }) => {
     }
 
     const renderCustomActions = (props) => {
-        return <CustomActions storage={storage} name={name} userID={userID} {...props} />;
+        return <CustomActions storage={storage} userID={userID} {...props} />;
     };
 
     const renderCustomView = (props) => {
@@ -103,6 +103,24 @@ const Chat = ({ db, route, navigation, isConnected, storage }) => {
         return null;
     }
 
+    const renderMessageVideo = (props) => {
+        const { currentMessage } = props;
+        return (
+            <View style={{ padding: 5 }}>
+                <Video
+                    source={{ uri: currentMessage.video }}
+                    rate={1.0}
+                    volume={1.0}
+                    isMuted={false}
+                    resizeMode="cover"
+                    shouldPlay
+                    isLooping
+                    style={{ width: 200, height: 150, borderRadius: 13 }}
+                />
+            </View>
+        );
+    };
+
     return (
         <View style={styles.container}>
             <GiftedChat
@@ -112,6 +130,7 @@ const Chat = ({ db, route, navigation, isConnected, storage }) => {
                 onSend={messages => onSend(messages)}
                 renderActions={renderCustomActions}
                 renderCustomView={renderCustomView}
+                renderMessageVideo={renderMessageVideo}
                 user={{
                     _id: userID,
                     name

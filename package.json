@@ -25,7 +25,8 @@
     "expo-image-picker": "~15.0.5",
     "expo-location": "~17.0.1",
     "react-native-maps": "1.14.0",
-    "@react-native-community/netinfo": "11.3.1"
+    "@react-native-community/netinfo": "11.3.1",
+    "expo-av": "~14.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
