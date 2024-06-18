@@ -1,14 +1,17 @@
+import React from "react";
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View, Alert } from 'react-native';
+// import the screens
 import Start from "./components/start";
 import Chat from "./components/chat";
 
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { LogBox } from "react-native";
-LogBox.ignoreLogs([
-  "[2024-04-07T20:44:48.130Z]  @firebase/auth: Auth (10.3.1)",
-]);
+// import react Navigation
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, enableNetwork, disableNetwork } from 'firebase/firestore';
+import { useNetInfo } from '@react-native-community/netinfo';
+import { useEffect } from 'react';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +30,18 @@ const App = () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+  // Get connection status
+  const connectionStatus = useNetInfo();
+
+  useEffect(() => {
+    if (connectionStatus.isConnected === false) {
+      Alert.alert("Connection Lost!");
+      disableNetwork(db);
+    } else if (connectionStatus.isConnected === true) {
+      enableNetwork(db);
+    }
+  }, [connectionStatus.isConnected]);
+
   return (
     /* Wrap the app with NavigationContainer */
     <NavigationContainer>
@@ -34,10 +49,11 @@ const App = () => {
       <Stack.Navigator initialRouteName="Start">
         <Stack.Screen name="Start" component={Start} />
         <Stack.Screen name="Chat">
-          {(props) => <Chat {...props} db={db} />}
+          {props => <Chat isConnected={connectionStatus.isConnected} db={db} {...props} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
+
 export default App;

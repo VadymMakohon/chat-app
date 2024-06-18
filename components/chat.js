@@ -1,90 +1,112 @@
-import { useEffect, useState } from "react";
-import { GiftedChat, Bubble } from "react-native-gifted-chat";
-import { StyleSheet, View, Platform, KeyboardAvoidingView } from "react-native";
-import {
-    onSnapshot,
-    query,
-    orderBy,
-    collection,
-    addDoc,
-} from "firebase/firestore";
-const Chat = ({ db, route, navigation }) => {
-    const { userID } = route.params;
-    const { name, background } = route.params;
+import { StyleSheet, View, Text, Alert } from 'react-native';
+import { useEffect, useState } from 'react';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { KeyboardAvoidingView, Platform } from 'react-native';
+import { collection, getDocs, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { InputToolbar } from 'react-native-gifted-chat';
+
+const Chat = ({ route, navigation, db, isConnected }) => {
+    const { name, color, userID } = route.params;
+
     const [messages, setMessages] = useState([]);
-    const onSend = (newMessages) => {
-        addDoc(collection(db, "messages"), newMessages[0]);
-    };
+    const onSend = (messages) => {
+        addDoc(collection(db, "messages"), messages[0])
+    }
 
-    const renderBubble = (props) => {
-        return (
-            <Bubble
-                {...props}
-                wrapperStyle={{
-                    right: {
-                        backgroundColor: "#484848",
-                    },
-                    left: {
-                        backgroundColor: "#fff",
-                    },
-                }}
-            />
-        );
-    };
-
-    // useEffect hook to set messages options
-    // Create a query to get the "messages" collection from the Firestore database
     useEffect(() => {
-        const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-
-        // Subscribe to changes in the "messages" collection using onSnapshot.
-        // This function will be called whenever there are changes in the collection.
-        const unsubMessages = onSnapshot(q, (documentsSnapshot) => {
-            // Initialize an empty array to store the new messages
-            let newMessages = [];
-            // Iterate through each document in the snapshot
-            documentsSnapshot.forEach((doc) => {
-                newMessages.push({
-                    id: doc.id,
-                    ...doc.data(),
-                    createdAt: new Date(doc.data().createdAt.toMillis()),
+        let unSubChat;
+        if (isConnected) {
+            // Create the query object, getting messages from the db, ordered by date in descending order
+            const qMessages = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+            unSubChat = onSnapshot(qMessages, async (chatData) => {
+                let newMessages = [];
+                // For each document in the database, do stuff, create a new item/message object and push it to the newmessages array
+                // Finally, once the foreach is done, pass the newmessages array into the messages state via setMessages...
+                chatData.forEach(doc => {
+                    let newItem = {
+                        ...doc.data(),
+                        createdAt: new Date(doc.data().createdAt.seconds * 1000) // Timestamp to date logic...
+                    };
+                    newMessages.push(newItem);
                 });
+
+                try {
+                    await AsyncStorage.setItem('newMessages', JSON.stringify(newMessages));
+                }
+                catch (error) {
+                    console.log(error);
+                }
+
+                setMessages(newMessages);
             });
-            setMessages(newMessages);
-        });
+        } else {
+            loadCachedMessages();
+        }
 
-        // Clean up code
+        // Used for cleanup to avoid memory leaks...
         return () => {
-            if (unsubMessages) unsubMessages();
-        };
-    }, []);
+            if (unSubChat) unSubChat();
+        }
+    }, [isConnected]);
 
-    // useEffect hook to set navigation options
+    // Sets the title to the name value passed thru the props from start screen...
     useEffect(() => {
         navigation.setOptions({ title: name });
-    }, []);
-    /* Render a View component with dynamic background color */
+    }, [name, navigation]);
+
+    const loadCachedMessages = async () => {
+        const cachedLists = await AsyncStorage.getItem("newMessages") || [];
+        setMessages(JSON.parse(cachedLists));
+        Alert.alert("loaded offline message data");
+    }
+
+    const renderBubble = (props) => {
+        return <Bubble
+            {...props}
+            wrapperStyle={{
+                right: {
+                    backgroundColor: "#000"
+                },
+                left: {
+                    backgroundColor: "#FFF"
+                }
+            }}
+        />
+    }
+
+    const renderInputToolbar = (props) => {
+        if (isConnected) {
+            return <InputToolbar {...props} />;
+        } else {
+            return null;
+        }
+    }
+
     return (
-        <View style={[styles.container, { backgroundColor: background }]}>
+        <View style={{ flex: 1, backgroundColor: color, height: '100%' }}>
             <GiftedChat
                 messages={messages}
+                onSend={messages => onSend(messages)}
                 renderBubble={renderBubble}
-                onSend={(messages) => onSend(messages)}
+                renderInputToolbar={renderInputToolbar}
                 user={{
                     _id: userID,
-                    name: name,
+                    name: name
                 }}
             />
-            {Platform.OS === "android" ? (
-                <KeyboardAvoidingView behavior="height" />
-            ) : null}
+            {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
+            {Platform.OS === "ios" ? <KeyboardAvoidingView behavior="padding" /> : null}
         </View>
     );
-};
-// Define styles for the component
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
 });
+
 export default Chat;
