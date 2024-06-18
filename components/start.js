@@ -20,7 +20,7 @@ const Start = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../assets/background-image.png')} resizeMode="cover" style={styles.image}></ImageBackground>
-            <Text style={{ textAlign: 'center', fontSize: 45, fontWeight: 600, color: '#FFFFFF', marginBottom: 30 }}>Chat App!</Text>
+            <Text style={{ textAlign: 'center', fontSize: 45, fontWeight: 600, color: '#FFFFFF', marginBottom: 30 }}>Chat App</Text>
             <View style={{ backgroundColor: 'white', height: '44%', width: '88%', marginLeft: 20 }}>
                 <TextInput style={styles.textInput} value={name} onChangeText={setName} placeholder='please type your name'></TextInput>
                 <Text style={{ textAlign: 'center' }}>Choose Background Color</Text>
