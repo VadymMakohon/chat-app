@@ -2,6 +2,8 @@
 
 This React Native 'Chat App' utilizes Google Firebase and Firestore to provide a modern, feature-rich messaging experience. Users can sign in, customize their background color, and send text messages, images from their device library or camera, and location data. The app integrates Expo libraries such as expo-image-picker and expo-location, alongside various React Native components, ensuring a seamless and robust chat functionality.
 
+![Screenshot 2024-06-18 at 11 15 10 PM](https://github.com/VadymMakohon/chat-app/assets/138728243/e61716cf-fd16-444c-a887-b03e22f2e11c)
+
 ## User Stories
 
 - As a new user, I want to be able to easily enter a chat room so I can quickly start talking to my friends and family.
