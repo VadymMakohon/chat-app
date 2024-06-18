@@ -8,12 +8,33 @@ import {
     TouchableOpacity,
     Platform,
     KeyboardAvoidingView,
+    Alert,
 } from "react-native";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 // Define the Start component
 const Start = ({ navigation }) => {
+    const auth = getAuth();
+    // State to hold the name input value
     const [name, setName] = useState("");
-    const [background, setBackground] = useState("#ffffff"); // Default background color
+    // State to hold the chosen background color
+    const [background, setBackground] = useState("");
+
+    // handle the sign-in anonymously process for the user.
+    const signInUser = () => {
+        signInAnonymously(auth)
+            .then((result) => {
+                navigation.navigate("Chat", {
+                    name: name,
+                    background: background,
+                    userID: result.user.uid,
+                });
+                Alert.alert("Signed in Successfully!");
+            })
+            .catch((error) => {
+                Alert.alert("Unable to sign in, try later again.");
+            });
+    };
 
     return (
         <ImageBackground
@@ -21,15 +42,14 @@ const Start = ({ navigation }) => {
             style={styles.imageBackground}
             resizeMode="cover"
         >
-            <Text style={styles.appTitle}>CHAT APP</Text>
+            <Text style={styles.appTitle}>APP Title</Text>
             <View style={styles.container}>
                 <TextInput
                     style={styles.textInput}
                     value={name}
                     onChangeText={setName}
                     placeholder="Your Name"
-                />
-
+                ></TextInput>
                 <View style={styles.chooseColorBox}>
                     <Text style={styles.chooseColorText}>Choose Background Color:</Text>
                     <View style={styles.colorButtonsContainer}>
@@ -44,8 +64,9 @@ const Start = ({ navigation }) => {
                                 { backgroundColor: "#090C08" },
                                 background === "#090C08" && styles.selectedColor,
                             ]}
+                            // Set the function to handle button press
                             onPress={() => setBackground("#090C08")}
-                        />
+                        ></TouchableOpacity>
                         <TouchableOpacity
                             style={[
                                 styles.chooseColor,
@@ -53,7 +74,7 @@ const Start = ({ navigation }) => {
                                 background === "#474056" && styles.selectedColor,
                             ]}
                             onPress={() => setBackground("#474056")}
-                        />
+                        ></TouchableOpacity>
                         <TouchableOpacity
                             style={[
                                 styles.chooseColor,
@@ -61,7 +82,7 @@ const Start = ({ navigation }) => {
                                 background === "#8A95A5" && styles.selectedColor,
                             ]}
                             onPress={() => setBackground("#8A95A5")}
-                        />
+                        ></TouchableOpacity>
                         <TouchableOpacity
                             style={[
                                 styles.chooseColor,
@@ -69,16 +90,11 @@ const Start = ({ navigation }) => {
                                 background === "#B9C6AE" && styles.selectedColor,
                             ]}
                             onPress={() => setBackground("#B9C6AE")}
-                        />
+                        ></TouchableOpacity>
                     </View>
                 </View>
-
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() =>
-                        navigation.navigate("Chat", { name, background })
-                    }
-                >
+                {/* Render a TouchableOpacity for starting the chat */}
+                <TouchableOpacity style={styles.button} onPress={signInUser}>
                     <Text style={styles.textButton}>Start Chatting</Text>
                 </TouchableOpacity>
             </View>
@@ -88,7 +104,6 @@ const Start = ({ navigation }) => {
         </ImageBackground>
     );
 };
-
 // Define styles for the component
 const styles = StyleSheet.create({
     imageBackground: {
@@ -167,5 +182,4 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
     },
 });
-
 export default Start;
