@@ -6,7 +6,7 @@ Everyone is welcome to contribute to chat-app. Contributing doesn’t just mean 
 
 Before contributing, please read the Contributor Covenant Code of Conduct. By participating, you are expected to uphold this code.
 
-We love pull requests. Here's a quick guide:
+I love pull requests. Here's a quick guide:
 
 1. Check for existing issues to avoid duplicates.
 2. Fork the repo and clone it locally.
